@@ -1,0 +1,79 @@
+version: "3.5"
+
+services:
+     
+    gestorfox:
+        container_name: "gestorfox"
+        restart: "always"
+        image: "tecnologiafox/php:5.6-apache"
+        networks:
+            network:
+                ipv4_address: "172.10.0.2"
+        volumes:
+            - "./gestorfox:/var/www/html"
+        depends_on:
+            - "gestorfox-database"
+        links:
+            - "gestorfox-webservice"
+        extra_hosts:
+            - "localhost.gestorfox.com.br:127.0.0.1"
+
+    gestorfox-webservice:
+        container_name: "gestorfox-webservice"
+        restart: "always"
+        image: "tecnologiafox/php:5.6-apache"
+        networks:
+            network:
+                ipv4_address: "172.10.0.3"
+        volumes:
+            - "./gestorfox-webservice:/var/www/html"
+        depends_on:
+            - "gestorfox-database"
+
+    gestorfox-database:
+        container_name: "gestorfox-database"
+        restart: "always"
+        image: "mysql:5.6"
+        networks:
+            network:
+                ipv4_address: "172.10.0.4"
+        volumes:
+            - "/dev/shm/mysql/gestorfox:/var/lib/mysql"
+        environment:
+            - "MYSQL_ROOT_PASSWORD=fox"
+            - "MYSQL_DATABASE=fox_db"
+
+    tudobonus:
+        container_name: "tudobonus"
+        restart: "always"
+        image: "tecnologiafox/php:5.6-apache"
+        networks:
+            network:
+                ipv4_address: "172.10.0.5"
+        volumes:
+            - "./tudobonus:/var/www/html"
+            - "./tudobonus-db-data:/home/tudobonus-db-data"
+        depends_on:
+            - "tudobonus-database"
+        links:
+            - "gestorfox-webservice"
+
+    tudobonus-database:
+        container_name: "tudobonus-database"
+        restart: "always"
+        image: "mysql:5.6"
+        networks:
+            network:
+                ipv4_address: "172.10.0.6"
+        volumes:
+            - "/dev/shm/mysql/tudobonus:/var/lib/mysql"
+        environment:
+            - "MYSQL_ALLOW_EMPTY_PASSWORD=true"
+
+networks:
+    network:
+        name: "fox-network"
+        driver: "bridge"
+        ipam:
+            config:
+                - subnet: "172.10.0.0/16"
