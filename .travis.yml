@@ -1,0 +1,10 @@
+sudo: required
+
+languauge: ruby
+
+services:
+    - docker
+
+berfore_install:
+    - cd php/5.6/
+    - docker build -t tecnologiafox/php:5.6-apache .
